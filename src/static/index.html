@@ -46,5 +46,53 @@
     </footer>
 
     <script src="app.js"></script>
+    <script>
+      // Добавляем/заменяем скрипт для отображения участников в карточках активности
+      document.addEventListener("DOMContentLoaded", async () => {
+        const activitiesList = document.getElementById("activities-list");
+        const activitySelect = document.getElementById("activity");
+
+        // Получаем данные об активностях
+        const resp = await fetch("/activities");
+        const activities = await resp.json();
+
+        // Очищаем список активностей
+        activitiesList.innerHTML = "";
+
+        // Заполняем выпадающий список
+        activitySelect.innerHTML = '<option value="">-- Select an activity --</option>';
+
+        Object.entries(activities).forEach(([name, info]) => {
+          // Создаем карточку активности
+          const card = document.createElement("div");
+          card.className = "activity-card";
+
+          card.innerHTML = `
+            <h4>${name}</h4>
+            <p><strong>Description:</strong> ${info.description}</p>
+            <p><strong>Schedule:</strong> ${info.schedule}</p>
+            <p><strong>Max Participants:</strong> ${info.max_participants}</p>
+            <div class="participants-section">
+              <strong>Participants:</strong>
+              ${
+                info.participants && info.participants.length > 0
+                  ? `<ul class="participants-list">
+                      ${info.participants.map(email => `<li>${email}</li>`).join("")}
+                    </ul>`
+                  : `<span class="no-participants">No participants yet</span>`
+              }
+            </div>
+          `;
+
+          activitiesList.appendChild(card);
+
+          // Добавляем опцию в выпадающий список
+          const option = document.createElement("option");
+          option.value = name;
+          option.textContent = name;
+          activitySelect.appendChild(option);
+        });
+      });
+    </script>
   </body>
 </html>
